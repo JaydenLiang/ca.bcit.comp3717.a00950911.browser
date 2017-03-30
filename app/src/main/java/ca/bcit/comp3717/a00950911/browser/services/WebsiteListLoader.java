@@ -18,15 +18,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 /**
  * Created by jaydenliang on 2017-03-23.
  */
 
 public class WebsiteListLoader {
-    private static String src = "http://cartoonapi.azurewebsites.net/api/cartoon/";
     public static String LOCAL_EVENT_ON_LIST_LOADED_COMPLETE = "BrowserListLoader_LOCAL_EVENT_ON_LIST_LOADED_COMPLETE";
+    private static String src = "http://cartoonapi.azurewebsites.net/api/cartoon/";
     private Context context;
     private URL url;
     private ArrayList<WebsiteObject> websiteObjects;
@@ -74,9 +73,15 @@ public class WebsiteListLoader {
         try {
             while (i > 0) {
                 JSONObject o = json.getJSONObject(--i);
-//                WebsiteObject w = new WebsiteObject(o.getString("name"), o.getString("pictureUrl"));
-                WebsiteObject w = new WebsiteObject(o.getString("name"), i % 2 == 0 ? "http://www.bcit.ca/" :
-                        "https://developer.android.com/");
+                String websiteURL;
+                if (o.has("url"))
+                    websiteURL = o.getString("url");
+                else if (o.has("pictureUrl"))
+                    websiteURL = o.getString("pictureUrl");
+                else
+                    websiteURL = i % 2 == 0 ? "http://www.bcit.ca/" : "http://www.youtube.com/";
+
+                WebsiteObject w = new WebsiteObject(o.getString("name"), websiteURL);
                 websiteObjects.add(w);
             }
         }catch (JSONException e){
@@ -137,7 +142,7 @@ public class WebsiteListLoader {
         private String name;
         private String rawURL;
 
-        public WebsiteObject(String name, String rawURL) {
+        WebsiteObject(String name, String rawURL) {
             this.name = name.trim();
             this.rawURL = rawURL.trim();
         }
@@ -157,9 +162,7 @@ public class WebsiteListLoader {
             } catch (MalformedURLException e){
                 e.printStackTrace();
             }
-            finally {
-                return url;
-            }
+            return url;
         }
     }
 }
