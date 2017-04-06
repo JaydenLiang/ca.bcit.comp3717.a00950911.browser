@@ -58,6 +58,33 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         load();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(broadcastReceiver);
+        httpContentLoader.cleanup();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
     /**
      * load the content from source URL
      */
@@ -179,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 websiteListAdapter.addAll(items);
             }
         }
+        httpContentLoader.destroyLoader(loader);
     }
 
     @Override

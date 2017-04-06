@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.SparseArray;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -16,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A Http content loader class
@@ -29,11 +29,11 @@ public class HTTPContentLoader {
     private static int LOADER_INVALID_ID = -1;
     private static String LOADER_VAR_ID = "loader_id";
     private Context context;
-    private SparseArray<Loader> loaderSparseArray;
+    private HashMap<Integer, Loader> loaderHashMap;
 
     public HTTPContentLoader(Context context) {
         this.context = context;
-        loaderSparseArray = new SparseArray<>();
+        loaderHashMap = new HashMap<>();
     }
 
     /**
@@ -46,7 +46,7 @@ public class HTTPContentLoader {
     public Loader createLoader(@NonNull String url) throws MalformedURLException {
         URL u = new URL(url);
         Loader loader = new Loader(u);
-        loaderSparseArray.setValueAt(loader.getId(), loader);
+        loaderHashMap.put(loader.getId(), loader);
         return loader;
     }
 
@@ -57,7 +57,7 @@ public class HTTPContentLoader {
      * @return a Loader that is created and can be used by this class
      */
     public Loader getLoader(int id) {
-        return loaderSparseArray.get(id);
+        return loaderHashMap.get(id);
     }
 
     /**
@@ -106,6 +106,20 @@ public class HTTPContentLoader {
         Intent intent = new Intent(LOCAL_EVENT_ON_HTTP_CONTENT_LOAD_COMPLETED);
         intent.putExtra(LOADER_VAR_ID, id);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+    }
+
+    public HTTPContentLoader destroyLoader(@NonNull Loader loader) {
+        Loader l = loaderHashMap.get(loader.getId());
+        if (l == loader) {
+            loaderHashMap.remove(loader.getId());
+        }
+        return this;
+    }
+
+    public HTTPContentLoader cleanup() {
+        while (loaderHashMap.size() > 0)
+            loaderHashMap.remove(0);
+        return this;
     }
 
     /**
